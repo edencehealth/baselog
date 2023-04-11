@@ -27,4 +27,19 @@ def tmp_log_dir(tmp_path):
         for f in os.listdir(tmp_path)
         if (f.endswith(".log") and os.path.isfile(os.path.join(tmp_path, f)))
     ]
-    os.rmdir(tmp_path)
+    if len(os.listdir(tmp_path)) < 1:
+        os.rmdir(tmp_path)
+
+
+@pytest.fixture
+def tmp_run_files(tmp_path):
+    """
+    returns a coule temp files, which are needed to run the an external test program
+    """
+    paths = [tmp_path / filename for filename in ("test_prog.py", "stderr.log")]
+    yield paths
+    for file in paths:
+        if os.path.exists(file):
+            os.unlink(file)
+    if len(os.listdir(tmp_path)) < 1:
+        os.rmdir(tmp_path)

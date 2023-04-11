@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 """ module """
-from .baselog import setup_logging
+from .baselog import BaseLog
 
-__all__ = ["setup_logging"]
+__all__ = ["BaseLog"]
