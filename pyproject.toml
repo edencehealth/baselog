@@ -1,0 +1,59 @@
+[project]
+name = "baselog"
+version = "1.0.0"
+authors = [
+  { name="Ben Burke", email="actualben@users.noreply.github.com" },
+]
+description = "typed 12-factor app configuration helper"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+    "Operating System :: OS Independent",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+#dependencies = {file = ["requirements.txt"]}
+
+[project.urls]
+"Homepage" = "https://github.com/edencehealth/baselog"
+"Bug Tracker" = "https://github.com/edencehealth/baselog/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.vulture]
+# exclude = ["*file*.py", "dir/"]
+# ignore_decorators = ["@app.route", "@require_*"]
+# ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 80
+paths = ["src"]
+sort_by_size = true
+verbose = true
+
+[tool.bandit]
+exclude_dirs = ["tests",]
+
+[tool.pylint]
+max-line-length = 100
+disable = [
+    "too-few-public-methods",
+    "too-many-arguments",
+]
+init-hook='import sys; sys.path.append("src")'
+
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/7.1.x/reference/customize.html
+minversion = "6.0"
+addopts = "-v"
+testpaths = [
+    "tests/",
+]
+pythonpath = [
+  "src"
+]
