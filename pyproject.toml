@@ -4,7 +4,7 @@ version = "2.0.0"
 authors = [
   { name="Ben Burke", email="actualben@users.noreply.github.com" },
 ]
-description = "typed 12-factor app configuration helper"
+description = "helper for log initialization"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
