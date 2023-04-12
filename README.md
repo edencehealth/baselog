@@ -54,7 +54,7 @@ A `sys.excepthook` is set by `BaseLog`, so in the case of an uncaught exception,
 2023-04-11T20:06:59+0000 - logdemo - INFO - starting a thing
 2023-04-11T20:06:59+0000 - logdemo.util - WARNING - Things may be happening
 2023-04-11T20:06:59+0000 - logdemo.other.funcs - INFO - Things aren't happening yet
-2023-04-11T20:06:59+0000 - logdemo - CRITICAL - uncaught exception: RuntimeError; What the crap!
+2023-04-11T20:06:59+0000 - logdemo - CRITICAL - uncaught exception: RuntimeError; What the heck?!
 2023-04-11T20:06:59+0000 - logdemo - CRITICAL - traceback-000: Traceback (most recent call last):
 2023-04-11T20:06:59+0000 - logdemo - CRITICAL - traceback-001:   File "<frozen runpy>", line 198, in _run_module_as_main
 2023-04-11T20:06:59+0000 - logdemo - CRITICAL - traceback-002:   File "<frozen runpy>", line 88, in _run_code
