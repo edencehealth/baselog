@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" test configuration via command-line arguments """
+""" test essential functions of the package """
 import os
 import re
 import subprocess
@@ -52,8 +52,10 @@ def test_basics(tmp_log_dir, capsys):
             f"I'm a log message at {level} level!\n"
         )
 
-    assert re.match(f"^{expected_contents}$", captured.err)
-    assert re.match(f"^{expected_contents}$", read_file_text(logger.log_file))
+    assert re.match(f"^{expected_contents}$", captured.err) is not None
+    assert (
+        re.match(f"^{expected_contents}$", read_file_text(logger.log_file)) is not None
+    )
 
 
 def test_uncaught_exception(tmp_run_files, tmp_log_dir):
@@ -109,17 +111,43 @@ def test_uncaught_exception(tmp_run_files, tmp_log_dir):
     assert prog_log_file != ""
     prog_log = read_file_text(prog_log_file)
 
-    assert (
-        "testapp - CRITICAL - uncaught RobinExclamation exception: "
-        "Holy uncaught exceptions, Batman!"
-    ) in prog_log
-    assert "traceback-000: Traceback (most recent call last):" in prog_log
-
-    # subprocess captured the program's stderr into a file for us
     stderr_log = read_file_text(stderr_log_file)
     assert stderr_log != ""
-    assert (
-        "testapp - CRITICAL - uncaught RobinExclamation exception: "
-        "Holy uncaught exceptions, Batman!"
-    ) in stderr_log
-    assert "traceback-000: Traceback (most recent call last):" in stderr_log
+
+    for expectation in (
+        "testapp - CRITICAL - uncaught RobinExclamation exception:",
+        "testapp - CRITICAL - exception L0: Holy uncaught exceptions, Batman!",
+        "testapp - CRITICAL - traceback L0: Traceback (most recent call last):",
+        "testapp - CRITICAL - traceback L5: RobinExclamation: Holy uncaught exceptions, Batman!",
+    ):
+        assert expectation in stderr_log
+        assert expectation in prog_log
+
+
+def test_zeropad_fmt():
+    """test zeropad_fmt with various inputs"""
+    for given_input, expected_output in {
+        -224234234: "%010d",
+        -42345234: "%09d",
+        -6345634: "%08d",
+        -745677: "%07d",
+        -85673: "%06d",
+        -9435: "%05d",
+        -723: "%04d",
+        -25: "%03d",
+        -8: "%02d",
+        -1: "%02d",
+        0: "%01d",
+        1: "%01d",
+        6: "%01d",
+        14: "%02d",
+        375: "%03d",
+        9867: "%04d",
+        12754: "%05d",
+        842845: "%06d",
+        4568456: "%07d",
+        34262346: "%08d",
+        345734577: "%09d",
+        9765956799: "%010d",
+    }.items():
+        assert BaseLog.zeropad_fmt(given_input) == expected_output

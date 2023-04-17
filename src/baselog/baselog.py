@@ -3,12 +3,13 @@
 # pylint: disable=too-many-instance-attributes
 import itertools
 import logging
+import math
 import os
 import sys
 import time
 import traceback
 from types import TracebackType
-from typing import Final, Literal, Mapping, Optional, Tuple, Type, Union
+from typing import Any, Final, Literal, Optional, Tuple, Type, Union
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
@@ -63,16 +64,13 @@ class BaseLog:
 
     def setup_loggers(self) -> None:
         """
-        sets up a console logger at the given log_level and if given a non-empty
-        log_dir it will be created if necessary and populated with log files;
-        returns a (logger, timestring) tuple
+        sets up a console logger (and optionally a file logger) at the specified
+        log_levels;
         """
-        logger = logging.getLogger(self.root_name)
-        logger.setLevel(self.console_log_level)
-        self.root_logger = logger
+        self.root_logger = logging.getLogger(self.root_name)
+        self.root_logger.setLevel(logging.DEBUG)
         logging.captureWarnings(True)
 
-        # always log to the console in a container context
         console_handler = logging.StreamHandler()
         console_handler.setLevel(self.console_log_level)
         console_handler.setFormatter(
@@ -81,13 +79,12 @@ class BaseLog:
                 datefmt=self.console_datefmt,
             )
         )
-        logger.addHandler(console_handler)
-
+        self.root_logger.addHandler(console_handler)
         sys.excepthook = self.handle_uncaught_exception
 
         if self.log_dir:
-            # make the log_dir if it doesn't exist
             if not os.path.isdir(self.log_dir):
+                # if given a log_dir that doesn't exist we try to create it
                 os.makedirs(self.log_dir)
 
             if not self.log_file_name:
@@ -103,7 +100,7 @@ class BaseLog:
                     datefmt=self.file_datefmt,
                 )
             )
-            logger.addHandler(file_handler)
+            self.root_logger.addHandler(file_handler)
 
     def handle_uncaught_exception(
         self,
@@ -112,113 +109,38 @@ class BaseLog:
         _traceback: Optional[TracebackType],
     ):
         """
-        handler intended to be called as a sys.excepthook when an exception is uncaught
+        handle_uncaught_exception is intended to be called as a sys.excepthook
+        which gets called when an exception is otherwise uncaught
         see: https://docs.python.org/3/library/sys.html#sys.excepthook
         """
-        self.root_logger.critical(
-            "uncaught %s exception: %s", exception_type.__name__, exception
-        )
+        self.root_logger.critical("uncaught %s exception:", exception_type.__name__)
+
+        exception_lines = str(exception).splitlines()
+        log_msg = f"exception L{self.zeropad_fmt(len(exception_lines))}: %s"
+        for i, line in enumerate(exception_lines):
+            self.root_logger.critical(log_msg, i, line.rstrip())
+
         if _traceback is not None:
             frames = traceback.format_exception(exception_type, exception, _traceback)
-            tb_lines = itertools.chain(*[frame.splitlines() for frame in frames])
+            tb_lines = list(itertools.chain(*[frame.splitlines() for frame in frames]))
+            log_msg = f"traceback L{self.zeropad_fmt(len(tb_lines))}: %s"
             for i, line in enumerate(tb_lines):
-                self.root_logger.critical("traceback-%03d: %s", i, line.rstrip())
+                self.root_logger.critical(log_msg, i, line.rstrip())
 
-    # the remaining functions are passthru calls to the root logger, but they
-    # are richly specified (instead of just using *args, **kwargs) to make code
-    # completion work better for end users
+    def __getattr__(self, name: str) -> Any:
+        """forwards unknown attribute access to our root_logger instance variable"""
+        # https://docs.python.org/3/reference/datamodel.html?highlight=__getattr__#object.__getattr__
+        return getattr(self.root_logger, name)
 
-    def debug(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: _ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 1,
-        extra: Optional[Mapping[str, object]] = None,
-    ) -> None:
-        """proxy to root logger's debug method"""
-        self.root_logger.debug(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
+    @staticmethod
+    def zeropad_fmt(maxval: int) -> str:
+        """print the log message template for zero-padding numbers up to max_value in size"""
+        length: int
+        if maxval == 0:
+            length = 1
+        else:
+            # leave room for the sign?
+            length = 1 if maxval > 0 else 2
+            length += int(math.log10(abs(maxval)))
 
-    def info(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: _ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 1,
-        extra: Optional[Mapping[str, object]] = None,
-    ):
-        """proxy to root logger's info method"""
-        self.root_logger.info(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def warning(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: _ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 1,
-        extra: Optional[Mapping[str, object]] = None,
-    ):
-        """proxy to root logger's warning method"""
-        self.root_logger.warning(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def error(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: _ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 1,
-        extra: Optional[Mapping[str, object]] = None,
-    ):
-        """proxy to root logger's error method"""
-        self.root_logger.error(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def critical(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: _ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 1,
-        extra: Optional[Mapping[str, object]] = None,
-    ):
-        """proxy to root logger's critical method"""
-        self.root_logger.critical(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
+        return f"%0{length}d"
