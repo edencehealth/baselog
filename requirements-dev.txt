@@ -7,4 +7,5 @@ mypy
 pycodestyle
 pylint
 pytest
+ruff
 twine
