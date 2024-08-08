@@ -4,6 +4,7 @@ build
 flake8
 isort
 mypy
+pre-commit~=3.8.0
 pycodestyle
 pylint
 pytest
