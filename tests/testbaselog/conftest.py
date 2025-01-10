@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" configuration for tests in this package """
+"""configuration for tests in this package"""
 # pylint: disable=too-few-public-methods
 
 import os

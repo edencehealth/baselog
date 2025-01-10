@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-""" implements the BaseLog class, a helper for standardizing logging across projects """
+"""implements the BaseLog class, a helper for standardizing logging across projects"""
+
 # pylint: disable=too-many-instance-attributes
 import itertools
 import logging
@@ -8,9 +9,34 @@ import sys
 import time
 import traceback
 from types import TracebackType
-from typing import Final, Literal, Mapping, Optional, Tuple, Type, Union
+from typing import (
+    Final,
+    Literal,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeAlias,
+    Union,
+)
 
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+LogLevel: TypeAlias = Literal[
+    "DEBUG",
+    "INFO",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+]
+
+LOG_LEVELS: Sequence[LogLevel] = (
+    "DEBUG",
+    "INFO",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+)
+DEFAULT_LOG_LEVEL: LogLevel = "DEBUG"
 
 # these next 2 annotations inspired by: https://stackoverflow.com/a/75384545
 _SysExcInfoType = Union[
@@ -43,10 +69,10 @@ class BaseLog:
         root_name: str,
         log_dir: Optional[str] = "/log",
         log_file_name: Optional[str] = None,
-        console_log_level: LogLevel = "DEBUG",
+        console_log_level: LogLevel = DEFAULT_LOG_LEVEL,
         console_logfmt: Optional[str] = None,
         console_datefmt: Optional[str] = None,
-        file_log_level: LogLevel = "DEBUG",
+        file_log_level: LogLevel = DEFAULT_LOG_LEVEL,
         file_logfmt: Optional[str] = None,
         file_datefmt: Optional[str] = None,
     ) -> None:
