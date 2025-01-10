@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-""" test configuration via command-line arguments """
+"""test configuration via command-line arguments"""
+
 import os
 import re
 import subprocess

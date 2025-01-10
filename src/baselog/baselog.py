@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-""" implements the BaseLog class, a helper for standardizing logging across projects """
+"""implements the BaseLog class, a helper for standardizing logging across projects"""
+
 # pylint: disable=too-many-instance-attributes
 import itertools
 import logging
