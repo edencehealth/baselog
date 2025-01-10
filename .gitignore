@@ -1,9 +1,10 @@
 *.egg-info
 .DS_Store
 .mypy_cache
+.python-version
 .venv
 .vscode
 __pycache__
 dist
+pytestdebug.log
 venv
-.python-version
