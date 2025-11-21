@@ -17,7 +17,7 @@ jobs:
     steps:
       # https://github.com/actions/checkout
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Version check
         run: |
